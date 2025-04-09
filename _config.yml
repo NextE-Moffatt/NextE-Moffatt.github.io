@@ -8,7 +8,7 @@
 # Site Settings
 title                    : "Fei Meng (孟非)"
 description              : "Natural Language Processing Researcher"
-repository               : "NextE-Moffat/NextE-Moffat.github.io"
+repository               : "NextE-Moffatt/NextE-Moffatt.github.io"
 google_scholar_stats_use_cdn : true
 
 # google analytics
@@ -28,7 +28,7 @@ author:
   employer         :
   pubmed           : 
   googlescholar    : # "https://scholar.google.com/citations?user=YOUR_GOOGLE_SCHOLAR_ID"
-  email            : # your email
+  email            : 1020177949@qq.com
   researchgate     : # e.g., "https://www.researchgate.net/profile/yourprofile"
   uri              :
   bitbucket        :
@@ -37,7 +37,7 @@ author:
   flickr           :
   facebook         :
   foursquare       :
-  github           : # e.g., "github username"
+  github           : https://github.com/NextE-Moffatt # e.g., "github username"
   google_plus      :
   keybase          :
   instagram        :
@@ -103,7 +103,7 @@ markdown: kramdown
 highlighter: rouge
 lsi: false
 excerpt_separator: "\n\n"
-incremental: false
+incremental: true
 
 
 # Markdown Processing

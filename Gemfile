@@ -12,6 +12,7 @@ source "https://rubygems.org"
 # Use github-pages for better compatibility
 gem "github-pages", "~> 228"
 gem "webrick", "~> 1.8"
+gem 'jekyll-livereload'
 
 # If you want to use Jekyll native, uncomment the line below.
 # To upgrade, run `bundle update`.
