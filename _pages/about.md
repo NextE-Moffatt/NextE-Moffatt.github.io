@@ -26,22 +26,43 @@ redirect_from:
 - 元学习
 
 # 🔥 最新动态
-- *2024.04*: &nbsp;🎉 测试实时更新功能
+- *2024.04*: &nbsp;📝 更新了[研究日志](/research-log)，记录了最新的实验进展
 - *2024.04*: &nbsp;🎉 个人学术主页上线
 
 # 📝 发表论文 
 
-<div class='paper-box'><div class='paper-box-image'><div><div class="badge">Conference Year</div><img src='images/500x300.png' alt="sym" width="100%"></div></div>
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge">EMNLP 2024</div><img src='../images/paper1.png' alt="paper1" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 
-[论文标题]()
+[基于大规模语言模型的对话系统研究](/llm-dialogue)
 
 **Fei Meng**, Author 2, Author 3
 
-[**Project**]() 
-- 论文简介和主要贡献
+[**PDF**](https://arxiv.org/pdf/xxxx.xxxxx.pdf) \| [**Code**](https://github.com/username/project) \| [**Project Page**](https://username.github.io/project) \| [**Video**](https://www.youtube.com/watch?v=xxx)
+
+- 本文提出了一种新的对话系统框架，基于大规模语言模型提升对话系统的性能
+- 在多个公开数据集上取得了最优结果
+- 代码已开源并被广泛使用
 </div>
 </div>
+
+<div class='paper-box'><div class='paper-box-image'><div><div class="badge">ACL 2023</div><img src='../images/paper2.png' alt="paper2" width="100%"></div></div>
+<div class='paper-box-text' markdown="1">
+
+[多模态学习在机器翻译中的应用](/papers/multimodal-mt/)
+
+**Fei Meng**, Author 2, Author 3
+
+[**PDF**](https://arxiv.org/pdf/yyyy.yyyyy.pdf) \| [**Code**](https://github.com/username/project2)
+
+- 提出了一种新的多模态学习框架，将视觉信息融入机器翻译系统
+- 显著提升了翻译质量，特别是在含有视觉场景的文本翻译任务中
+</div>
+</div>
+
+# 更多论文
+- [强化学习在对话系统中的应用研究](/papers/rl-dialogue/), **Fei Meng**, Author 2, Author 3, *ICLR 2023*
+- [元学习方法在少样本场景下的应用](/papers/meta-learning/), **Fei Meng**, Author 2, *AAAI 2023*
 
 # 🎖 获奖情况
 - *2024* 奖项名称
