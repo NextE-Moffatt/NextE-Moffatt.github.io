@@ -1,14 +1,14 @@
 ---
 title: "多模态学习在机器翻译中的应用"
 collection: papers
-permalink: /papers/multimodal-mt
+permalink: /multimodal-mt
 excerpt: "提出了一种新的多模态学习框架，将视觉信息融入机器翻译系统"
 ---
 
 # 多模态学习在机器翻译中的应用
 
 ## 作者
-**Fei Meng**, Author 2, Author 3
+**Author 1**, Author 2, Author 3
 
 ## 发表于
 ACL 2023

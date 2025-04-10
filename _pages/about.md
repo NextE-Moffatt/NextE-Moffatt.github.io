@@ -17,64 +17,82 @@ redirect_from:
 
 <span class='anchor' id='about-me'></span>
 
-我是孟非，目前主要从事自然语言处理（Natural Language Processing, NLP）方向的研究。我的研究兴趣包括但不限于：
-- 大规模语言模型（Large Language Models）
-- 多模态学习（Multimodal Learning）
-- 机器翻译（Machine Translation）
-- 对话系统（Dialogue Systems）
-- 强化学习
-- 元学习
+I am Fei Meng, currently focusing on Natural Language Processing (NLP) research. My research interests include:
+- Large Language Models
+- Multimodal Learning
+<!-- - Machine Translation -->
+<!-- - Dialogue Systems -->
+- Reinforcement Learning
+<!-- - Meta Learning -->
 
-# 🔥 最新动态
-- *2024.04*: &nbsp;📝 更新了[研究日志](/research-log)，记录了最新的实验进展
-- *2024.04*: &nbsp;🎉 个人学术主页上线
+<span class='anchor' id='news'></span>
 
-# 📝 发表论文 
+# 🔥 News
+
+- *2024.04*: &nbsp;📝 Updated [research log](/research-log) with recent experimental progress
+- *2024.04*: &nbsp;🎉 Personal academic homepage launched
+
+<span class='anchor' id='publications'></span>
+
+# 📝 Publications
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">EMNLP 2024</div><img src='../images/paper1.png' alt="paper1" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 
-[基于大规模语言模型的对话系统研究](/llm-dialogue)
+[Large Language Models for Dialogue Systems](/llm-dialogue)
 
-**Fei Meng**, Author 2, Author 3
+**Author 1**, Author 2, Author 3
 
 [**PDF**](https://arxiv.org/pdf/xxxx.xxxxx.pdf) \| [**Code**](https://github.com/username/project) \| [**Project Page**](https://username.github.io/project) \| [**Video**](https://www.youtube.com/watch?v=xxx)
 
-- 本文提出了一种新的对话系统框架，基于大规模语言模型提升对话系统的性能
-- 在多个公开数据集上取得了最优结果
-- 代码已开源并被广泛使用
+- Proposed a novel dialogue system framework based on large language models
+- Achieved state-of-the-art results on multiple public datasets
+- Released open-source code with wide adoption
 </div>
 </div>
 
 <div class='paper-box'><div class='paper-box-image'><div><div class="badge">ACL 2023</div><img src='../images/paper2.png' alt="paper2" width="100%"></div></div>
 <div class='paper-box-text' markdown="1">
 
-[多模态学习在机器翻译中的应用](/papers/multimodal-mt/)
+[Multimodal Learning for Machine Translation](/multimodal-mt)
 
-**Fei Meng**, Author 2, Author 3
+**Author 1**, Author 2, Author 3
 
 [**PDF**](https://arxiv.org/pdf/yyyy.yyyyy.pdf) \| [**Code**](https://github.com/username/project2)
 
-- 提出了一种新的多模态学习框架，将视觉信息融入机器翻译系统
-- 显著提升了翻译质量，特别是在含有视觉场景的文本翻译任务中
+- Introduced a novel multimodal learning framework for machine translation
+- Significantly improved translation quality, especially for visual scene-related text
 </div>
 </div>
 
-# 更多论文
-- [强化学习在对话系统中的应用研究](/papers/rl-dialogue/), **Fei Meng**, Author 2, Author 3, *ICLR 2023*
-- [元学习方法在少样本场景下的应用](/papers/meta-learning/), **Fei Meng**, Author 2, *AAAI 2023*
+# 📚 More Publications
 
-# 🎖 获奖情况
-- *2024* 奖项名称
-- *2023* 奖项名称
+- [Reinforcement Learning for Dialogue Systems](/papers/rl-dialogue/), **Author 1**, Author 2, Author 3, *ICLR 2023*
+- [Meta Learning for Few-shot Learning](/papers/meta-learning/), **Author 1**, Author 2, *AAAI 2023*
 
-# 📖 教育经历
-- *2021 - 2024*, 清华大学
-- *2013 - 2017*, 西安理工大学
+<span class='anchor' id='honors'></span>
 
-# 💬 学术报告
-- *2024.03*, 报告题目，会议/单位名称
-- *2023.09*, 报告题目，会议/单位名称
+# 🎖 Honors and Awards
 
-# 💻 实习经历
-- *2023.06 - 2023.09*, 公司名称，职位，工作内容
+- *2024* Outstanding Graduate Student Award, Tsinghua University
+- *2023* Best Paper Award, Conference Name
+
+<span class='anchor' id='education'></span>
+
+# 📖 Education
+
+- *2021 - 2024*, Tsinghua University
+- *2013 - 2017*, Xi'an University of Technology
+
+<span class='anchor' id='talks'></span>
+
+# 💬 Invited Talks
+
+- *2024.03*, Recent Advances in LLMs, Conference/Institution name
+- *2023.09*, Multimodal Learning Applications, Conference/Institution name
+
+<span class='anchor' id='internships'></span>
+
+# 💻 Internships
+
+- *2023.09 - 2024.03*, Tsinghua AIR, Research Intern, AI Research Lab

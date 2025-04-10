@@ -6,8 +6,8 @@
 # `jekyll serve`. If you change this file, please restart the server process.
 
 # Site Settings
-title                    : "Fei Meng (孟非)"
-description              : "Natural Language Processing Researcher"
+title                    : "Fei Meng (孟飞)"
+description              : "This is my personal website"
 repository               : "NextE-Moffatt/NextE-Moffatt.github.io"
 google_scholar_stats_use_cdn : true
 
@@ -21,14 +21,14 @@ baidu_site_verification  :  # get baidu_site_verification from https://ziyuan.ba
 
 # Site Author
 author:
-  name             : "Fei Meng (孟非)"
-  avatar           : "images/mengfei.png"
+  name             : "Fei Meng (孟飞)"
+  avatar           : "images/mengfei1.png"
   bio              : "Natural Language Processing Researcher"
-  location         : "Zhejiang, China"
+  location         : "China"
   employer         :
   pubmed           : 
   googlescholar    : # "https://scholar.google.com/citations?user=YOUR_GOOGLE_SCHOLAR_ID"
-  email            : 1020177949@qq.com
+  email            : murphythu@qq.com
   researchgate     : # e.g., "https://www.researchgate.net/profile/yourprofile"
   uri              :
   bitbucket        :
@@ -37,7 +37,7 @@ author:
   flickr           :
   facebook         :
   foursquare       :
-  github           : https://github.com/NextE-Moffatt # e.g., "github username"
+  github           : NextE-Moffatt # e.g., "github username"
   google_plus      :
   keybase          :
   instagram        :

@@ -11,7 +11,7 @@ toc_sticky: true
 # 基于大规模语言模型的对话系统研究
 
 ## 作者
-**Fei Meng**, Author 2, Author 3
+**Author 1**, Author 2, Author 3
 
 ## 发表于
 EMNLP 2024
