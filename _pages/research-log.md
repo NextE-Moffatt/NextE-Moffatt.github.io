@@ -99,3 +99,11 @@ toc_sticky: true
 ### 监控助手
 - 完成Mac电脑上调用摄像头和录音
 - 尝试调用本地模型
+
+# 2024-4-16
+### 服务器空间不足解决方案
+- 扩容
+```
+sudo lvextend -L +20G /dev/ubuntu-vg/ubuntu-lv
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+```
