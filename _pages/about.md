@@ -79,10 +79,10 @@ I am Fei Meng, currently focusing on Natural Language Processing (NLP) research.
 
 <span class='anchor' id='education'></span>
 
-# 📖 Education
+<!-- # 📖 Education
 
 - *2021 - 2024*, Tsinghua University
-- *2013 - 2017*, Xi'an University of Technology
+- *2013 - 2017*, Xi'an University of Technology -->
 
 <span class='anchor' id='talks'></span>
 
