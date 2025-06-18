@@ -107,3 +107,9 @@ toc_sticky: true
 sudo lvextend -L +20G /dev/ubuntu-vg/ubuntu-lv
 sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 ```
+
+# 2024-5-16~2024-6-16
+### 天迹原型搭建
+- 检测图
+
+![实时检测图](images/tianji.png)
