@@ -111,5 +111,5 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 # 2024-5-16~2024-6-16
 ### 天迹原型搭建
 - 检测图
-
+- 完成自动生成检测内容功能和视频流实时检测
 ![实时检测图](images/tianji.png)
