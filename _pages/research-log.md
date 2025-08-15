@@ -119,3 +119,12 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 ```
 export https_proxy=http://192.168.0.175:7890 http_proxy=http://192.168.0.175:7890 all_proxy=socks5://192.168.0.175:7890
 ```
+# 2025-8-15
+服务器转发到本地屏幕
+```
+/opt/TurboVNC/bin/vncserver :1
+### 本地端口设置
+192.169.0.200:5901
+```
+
+
