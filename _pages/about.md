@@ -74,8 +74,8 @@ I am Fei Meng, currently focusing on Natural Language Processing (NLP) research.
 
 # 🎖 Honors and Awards
 
-- *2024* Outstanding Graduate Student Award, Tsinghua University
-- *2023* Best Paper Award, Conference Name
+<!-- - *2024* Outstanding Graduate Student Award, Tsinghua University
+- *2023* Best Paper Award, Conference Name -->
 
 <span class='anchor' id='education'></span>
 
