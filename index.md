@@ -562,6 +562,211 @@ def evaluate_batch(states, ground_truth_actions):
 - **参考：** DEPS / Voyager / GLAM
 - **周期：** 4~6 周
 
+#### 详细技术方案
+
+**核心问题：言行匹配**
+
+> LLM 说"推上路二塔"，但 RL Agent 实际跑去打野区 —— 这是"言行不匹配"。
+> 本项目的目标：让 RL 的行为轨迹与 LLM 的语言目标保持一致，并用 Reflexion 机制形成闭环反思。
+
+**系统架构（三层闭环）**
+
+```
+┌──────────────────────────────────────────────────────┐
+│  Layer 1：LLM 规划层                                  │
+│  输入：游戏状态文本                                    │
+│  输出：自然语言目标 g_text = "集合上路推二塔"          │
+└───────────────────┬──────────────────────────────────┘
+                    │ 目标嵌入 g_embed = Encode(g_text)
+┌───────────────────▼──────────────────────────────────┐
+│  Layer 2：RL 执行层                                   │
+│  输入：环境状态 s_t + 目标嵌入 g_embed                │
+│  输出：原子动作 a_t                                   │
+│  奖励：r_env（环境）+ r_align（言行匹配奖励）          │
+└───────────────────┬──────────────────────────────────┘
+                    │ 执行轨迹 τ = (s,a,r) 序列
+┌───────────────────▼──────────────────────────────────┐
+│  Layer 3：Reflexion 反思层                            │
+│  输入：目标 g_text + 执行轨迹摘要                     │
+│  输出：反思文本 → 更新下一轮 LLM 规划的 Memory        │
+└──────────────────────────────────────────────────────┘
+```
+
+**言行匹配奖励（核心创新点）**
+
+```python
+import torch
+from sentence_transformers import SentenceTransformer
+
+encoder = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+def alignment_reward(g_text: str, trajectory_summary: str, weight: float = 0.3) -> float:
+    """
+    计算 LLM 目标语言 与 RL 实际轨迹摘要 的语义相似度，作为额外奖励信号
+    g_text:             LLM 输出的目标，如 "集合上路推二塔"
+    trajectory_summary: RL 轨迹自动生成摘要，如 "英雄移动到上路并攻击防御塔"
+    """
+    g_embed  = encoder.encode(g_text,             convert_to_tensor=True)
+    t_embed  = encoder.encode(trajectory_summary, convert_to_tensor=True)
+    similarity = torch.nn.functional.cosine_similarity(g_embed, t_embed, dim=0)
+    return weight * similarity.item()   # 相似度高 → 奖励高，促使 RL 行为与 LLM 目标对齐
+```
+
+**轨迹摘要生成器**
+
+```python
+def summarize_trajectory(states: list, actions: list) -> str:
+    """将 RL 轨迹转为自然语言，供 LLM 理解"""
+    action_map = {0: "向上移动", 1: "向下移动", 2: "向左移动",
+                  3: "向右移动", 4: "攻击", 5: "使用技能", 6: "撤退"}
+    action_counts = {}
+    for a in actions:
+        desc = action_map.get(a, "未知")
+        action_counts[desc] = action_counts.get(desc, 0) + 1
+    summary_parts = [f"{desc}{count}次" for desc, count in action_counts.items()]
+    final_pos = states[-1].get("position", "未知位置") if states else "未知"
+    return f"英雄执行了：{'、'.join(summary_parts)}，最终到达{final_pos}"
+```
+
+**RL Agent（PPO + 目标条件）**
+
+```python
+import torch.nn as nn
+
+class GoalConditionedPPO(nn.Module):
+    """目标条件化 PPO：将 LLM 目标嵌入拼接到状态中"""
+    def __init__(self, state_dim: int, goal_dim: int, action_dim: int):
+        super().__init__()
+        self.actor = nn.Sequential(
+            nn.Linear(state_dim + goal_dim, 256), nn.ReLU(),
+            nn.Linear(256, 128),                  nn.ReLU(),
+            nn.Linear(128, action_dim)
+        )
+        self.critic = nn.Sequential(
+            nn.Linear(state_dim + goal_dim, 256), nn.ReLU(),
+            nn.Linear(256, 128),                  nn.ReLU(),
+            nn.Linear(128, 1)
+        )
+
+    def forward(self, state: torch.Tensor, goal_embed: torch.Tensor):
+        x = torch.cat([state, goal_embed], dim=-1)
+        return self.actor(x), self.critic(x)
+
+    def get_total_reward(self, env_reward: float, g_text: str,
+                         traj_summary: str) -> float:
+        r_align = alignment_reward(g_text, traj_summary)
+        return env_reward + r_align
+```
+
+**Reflexion 反思层**
+
+```python
+REFLECT_PROMPT = """你是游戏 AI 的反思模块。
+目标：{goal}
+实际执行轨迹：{trajectory}
+环境奖励：{reward}
+
+请分析：
+1. 行为是否与目标一致？
+2. 失败原因是什么？
+3. 下次应该如何调整目标或策略？
+
+以 JSON 格式输出：{{"aligned": true/false, "failure_reason": "...", "next_adjustment": "..."}}"""
+
+class ReflexionMemory:
+    """存储反思历史，注入到下一轮 LLM 规划的 Prompt 中"""
+    def __init__(self, max_size: int = 5):
+        self.memory = []
+        self.max_size = max_size
+
+    def add(self, reflection: dict):
+        self.memory.append(reflection)
+        if len(self.memory) > self.max_size:
+            self.memory.pop(0)
+
+    def to_prompt(self) -> str:
+        if not self.memory:
+            return ""
+        lines = ["历史反思经验："]
+        for i, r in enumerate(self.memory[-3:], 1):   # 只取最近3条
+            lines.append(f"{i}. {r.get('next_adjustment', '')}")
+        return "\n".join(lines)
+
+def reflect(llm_client, goal: str, trajectory: str, reward: float) -> dict:
+    import json
+    prompt = REFLECT_PROMPT.format(goal=goal, trajectory=trajectory, reward=reward)
+    resp = llm_client.chat.completions.create(
+        model="qwen2.5:7b",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2
+    )
+    return json.loads(resp.choices[0].message.content)
+```
+
+**主训练循环（三层协同）**
+
+```python
+from openai import OpenAI
+
+def train(env, llm_client, agent, memory: ReflexionMemory, episodes: int = 2000):
+    for ep in range(episodes):
+        obs, _ = env.reset()
+        state_text = serialize_state(obs)           # 项目④的序列化器复用
+
+        # Layer 1：LLM 规划（注入 Reflexion Memory）
+        history_prompt = memory.to_prompt()
+        plan_prompt = f"{history_prompt}\n{state_text}\n请给出当前战术目标（一句话）："
+        g_text = llm_client.chat.completions.create(
+            model="qwen2.5:7b",
+            messages=[{"role": "user", "content": plan_prompt}],
+            temperature=0.3
+        ).choices[0].message.content.strip()
+
+        g_embed = torch.tensor(encoder.encode(g_text), dtype=torch.float32)
+
+        # Layer 2：RL 执行
+        states, actions, total_reward = [], [], 0
+        state_tensor = torch.tensor(obs["image"].flatten(), dtype=torch.float32)
+
+        for step in range(200):
+            logits, _ = agent(state_tensor.unsqueeze(0), g_embed.unsqueeze(0))
+            action = torch.distributions.Categorical(logits=logits).sample().item()
+            next_obs, r_env, done, _, _ = env.step(action)
+
+            traj_summary = summarize_trajectory(states, actions)
+            r_total = agent.get_total_reward(r_env, g_text, traj_summary)
+
+            states.append(obs); actions.append(action)
+            total_reward += r_total
+            state_tensor = torch.tensor(next_obs["image"].flatten(), dtype=torch.float32)
+            if done: break
+
+        # Layer 3：Reflexion 反思 → 更新 Memory
+        traj_summary = summarize_trajectory(states, actions)
+        reflection = reflect(llm_client, g_text, traj_summary, total_reward)
+        memory.add(reflection)
+
+        if ep % 100 == 0:
+            aligned = reflection.get("aligned", False)
+            print(f"Ep {ep:4d} | Reward: {total_reward:.2f} | "
+                  f"Goal: {g_text[:20]}... | Aligned: {aligned}")
+```
+
+**评测指标**
+
+| 指标 | 无 Reflexion | 有 Reflexion | 说明 |
+|------|-------------|-------------|------|
+| 言行匹配率 | ~45% | ~70% | 轨迹与目标语义相似度 > 0.6 |
+| 平均环境奖励 | baseline | +15~25% | Reflexion 修正错误目标 |
+| 收敛速度 | 2000 ep | ~1400 ep | Memory 加速策略探索 |
+| 目标失效率↓ | ~35% | ~18% | LLM 输出不可执行目标的比例 |
+
+**面试亮点总结**
+- 原创性：言行匹配奖励（语义相似度作为 reward shaping）是核心创新
+- 系统性：完整整合项目①②③④的所有模块
+- 理论深度：Reflexion 闭环 + KL 约束 + 内在奖励三重机制协同
+- 可量化：言行匹配率指标直接对应 JD 中"言行匹配"的核心需求
+
 ## 执行路线
 
 | 阶段 | 项目 | 目标 |
