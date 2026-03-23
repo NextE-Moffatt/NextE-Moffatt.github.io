@@ -225,6 +225,173 @@ asyncio.run(speak("敌方打野现身上路，立即撤退！"))
 - **亮点：** 体现"言行匹配"，决策可量化评估
 - **周期：** 1~2 周
 
+#### 详细技术方案
+
+**系统架构**
+
+```
+游戏状态结构体
+(血量/位置/经济/技能CD)
+        │
+        ▼
+  状态序列化器
+  (Python dict → 自然语言描述)
+        │
+        ▼
+  Prompt 构造器
+  (System Prompt + 状态描述 + CoT 指令)
+        │
+        ▼
+   LLM 推理
+   (Qwen2.5 / GPT-4)
+        │
+        ▼
+  结构化输出解析
+  (JSON: 目标/优先级/行动序列)
+        │
+        ▼
+  决策执行 & 评估
+  (可执行性校验 + 合理性打分)
+```
+
+**游戏状态定义**
+
+```python
+from dataclasses import dataclass
+from typing import List
+
+@dataclass
+class HeroState:
+    name: str
+    hp_ratio: float      # 当前血量百分比
+    position: str        # "上路/中路/下路/jungle/高地"
+    skill_ready: bool    # 大招是否就绪
+    economy: int         # 金币数
+
+@dataclass
+class GameState:
+    time_sec: int
+    our_team: List[HeroState]
+    enemy_team: List[HeroState]
+    map_events: List[str]   # ["龙刷新30s后", "上路一塔已破", "敌方打野现身下路"]
+    score_diff: int         # 我方经济领先值（负数为落后）
+```
+
+**状态序列化器**
+
+```python
+def serialize_state(state: GameState) -> str:
+    lines = [f"当前时间：{state.time_sec // 60}分{state.time_sec % 60}秒"]
+    lines.append(f"经济差：{'领先' if state.score_diff > 0 else '落后'} {abs(state.score_diff)} 金币")
+    lines.append("我方状态：")
+    for h in state.our_team:
+        skill = "大招就绪" if h.skill_ready else "大招CD中"
+        lines.append(f"  - {h.name}：血量{h.hp_ratio:.0%}，位于{h.position}，{skill}")
+    lines.append("敌方动态：")
+    for h in state.enemy_team:
+        lines.append(f"  - {h.name}：血量{h.hp_ratio:.0%}，位于{h.position}")
+    lines.append("地图事件：" + "；".join(state.map_events))
+    return "\n".join(lines)
+```
+
+**Prompt 模板（含 CoT）**
+
+```python
+SYSTEM_PROMPT = """你是王者荣耀顶级战术指挥官，擅长宏观决策。
+请严格按以下 JSON 格式输出，不要输出其他内容：
+{
+  "reasoning": "分析过程（50字内）",
+  "objective": "当前主要目标",
+  "priority": "high/medium/low",
+  "actions": [
+    {"hero": "英雄名", "action": "具体行动", "position": "目标位置"}
+  ],
+  "warning": "需要注意的威胁（可为null）"
+}"""
+
+def build_prompt(state: GameState) -> str:
+    state_text = serialize_state(state)
+    return f"{state_text}\n\n请给出当前最优战术决策："
+```
+
+**LLM 调用（支持本地 / API 两种模式）**
+
+```python
+import json
+from openai import OpenAI  # Qwen2.5 兼容 OpenAI 接口
+
+# 本地部署 Qwen2.5（ollama）
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+
+def get_decision(state: GameState) -> dict:
+    prompt = build_prompt(state)
+    response = client.chat.completions.create(
+        model="qwen2.5:7b",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user",   "content": prompt}
+        ],
+        temperature=0.3,   # 低温保证决策稳定性
+    )
+    text = response.choices[0].message.content
+    return json.loads(text)
+
+# 示例输出：
+# {
+#   "reasoning": "经济领先且敌方打野现身下路，上中路压制时机成熟",
+#   "objective": "推倒上路二塔",
+#   "priority": "high",
+#   "actions": [
+#     {"hero": "李白", "action": "压制上路", "position": "上路二塔"},
+#     {"hero": "诸葛亮", "action": "跟进支援", "position": "上路"}
+#   ],
+#   "warning": "注意敌方打野可能绕后"
+# }
+```
+
+**决策评估器**
+
+```python
+# 自动校验：动作是否可执行（英雄血量/位置合理性）
+def validate_decision(decision: dict, state: GameState) -> dict:
+    issues = []
+    our_heroes = {h.name: h for h in state.our_team}
+    for action in decision["actions"]:
+        hero = our_heroes.get(action["hero"])
+        if hero and hero.hp_ratio < 0.3:
+            issues.append(f"{action['hero']} 血量过低（{hero.hp_ratio:.0%}），不宜进攻")
+    decision["issues"] = issues
+    decision["executable"] = len(issues) == 0
+    return decision
+
+# 评测指标收集
+def evaluate_batch(states, ground_truth_actions):
+    results = []
+    for state, gt in zip(states, ground_truth_actions):
+        decision = get_decision(state)
+        validated = validate_decision(decision, state)
+        results.append({
+            "executable_rate": validated["executable"],
+            "objective_match": decision["objective"] == gt["objective"],
+            "latency_ms": ...  # 记录推理耗时
+        })
+    return results
+```
+
+**评测指标**
+
+| 指标 | 目标值 | 说明 |
+|------|--------|------|
+| JSON 解析成功率 | > 95% | 输出格式稳定性 |
+| 决策可执行率 | > 80% | 无血量/位置冲突 |
+| 目标合理性（人工1~5分） | > 3.5 | 对比职业选手录像 |
+| 推理延迟 | < 2s | 7B 模型本地推理 |
+
+**面试亮点总结**
+- 状态序列化设计体现对游戏 AI 输入工程的理解
+- CoT Prompt + 结构化 JSON 输出体现 LLM 工程能力
+- 自动校验器实现"言行匹配"的可量化评估，直击 JD 核心
+
 ### ⑤ LLM + RL 言行匹配联合框架（综合）
 - **方向：** LLM 高层规划 + RL 执行 + Reflexion 反思 + 奖励模型对齐
 - **参考：** DEPS / Voyager / GLAM
